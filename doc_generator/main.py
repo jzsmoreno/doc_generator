@@ -1,4 +1,5 @@
 import os
+import re
 
 from IPython.display import clear_output
 
@@ -8,33 +9,52 @@ from doc_generator.prompts import (
     prompt_for_generation_resume,
     prompt_for_review_format,
     prompt_for_table_creation,
+    system_prompt,
 )
-from doc_generator.utils import clean_completion_text, extract_cells, load_notebooks
+from doc_generator.utils import clean_completion_text, extract_cells, format_text, load_notebooks
 
 
 # Step 3: Send content (markdown + code) to an API for documentation generation
 def generate_documentation_from_api(client, markdown_content, code_content, model):
     """Processes extracted content with OpenAI API."""
 
+    print("Generating resume for code content...")
     prompt = prompt_for_generation_resume(code_content)
     completion = client.chat.completions.create(
-        model=model, messages=[{"role": "user", "content": prompt}]
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
     )
     context = clean_completion_text(completion)
+    print("Resume generated successfully.")
 
+    print("Generating tables for code content...")
     prompt = prompt_for_table_creation(code_content)
     completion = client.chat.completions.create(
-        model=model, messages=[{"role": "user", "content": prompt}]
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
     )
-    tables_info = clean_completion_text(completion)
+    response_text = completion.choices[0].message.content
+    tables_info = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL)
+    print("Tables generated successfully.")
 
     combined_content = (
         "\n\n**Markdown Cells**\n\n" + markdown_content + "\n\n**Code Cells**\n\n" + code_content
     )
 
+    print("Generating documentation for combined content...")
     prompt = prompt_for_documentation(combined_content, context, tables_info)
     completion = client.chat.completions.create(
-        model=model, messages=[{"role": "user", "content": prompt}]
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
     )
     cleaned_response = clean_completion_text(completion)
 
@@ -67,7 +87,11 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
         print("Generating review prompt for documentation...")
         prompt = prompt_for_review_format(documentation, language)
         completion = client.chat.completions.create(
-            model=model, messages=[{"role": "user", "content": prompt}]
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
         )
         documentation = clean_completion_text(completion)
         print("Review prompt processed and documentation cleaned.")
@@ -75,15 +99,23 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
         print("Generating name for the documentation...")
         prompt = prompt_for_documentation_name(context)
         completion = client.chat.completions.create(
-            model=model, messages=[{"role": "user", "content": prompt}]
+            model=model,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
         )
         doc_name = clean_completion_text(completion)
+        doc_name = format_text(doc_name)
         metadata_name = notebook["metadata"].get("name", "unnamed")
         doc_name = doc_name if metadata_name == "unnamed" else metadata_name
+        doc_name = doc_name.replace(".md", "") if doc_name.endswith(".md") else doc_name
         output_filename = os.path.join("output", f"{doc_name}.md")
         print(f"Generated documentation name: {doc_name}")
 
         print(f"Saving documentation to file: {output_filename}")
+        if len(output_filename) > 255:
+            output_filename = os.path.join("output", "unnamed_documentation.md")
         os.makedirs(os.path.dirname(output_filename), exist_ok=True)
         with open(output_filename, "w", encoding="utf-8") as f:
             f.write(documentation)

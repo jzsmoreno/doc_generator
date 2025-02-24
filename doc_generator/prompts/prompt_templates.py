@@ -1,16 +1,19 @@
+system_prompt = "You are an AI designed to provide direct answers to questions. Please respond only with the most accurate and concise answer, without any additional explanations, clarifications, or phrases."
+
+
 def prompt_for_documentation(combined_content, context, tables_info):
-    prompt = """
-    **Instructions**: Below is the content of a Jupyter Notebook in markdown and code format. Your task is to create clear documentation covering the purpose, methodology, analysis, results, and conclusions of the notebook. Organize it into the following sections:
+    prompt = """**Instructions**: Below is the content of a Jupyter Notebook in markdown and code format. Your task is to create clear and structured documentation that covers the purpose, methodology, analysis, results, and conclusions of the notebook. Organize it into the following sections:
 
     1. **Introduction**: Briefly describe the main goal of the notebook.
     2. **Methodology**: Summarize the key steps and processes followed.
-    3. **Analysis and Results**: Outline the analysis and results obtained.
+    3. **Analysis and Results**: Outline the analysis and results obtained, including references to any tables. Include the tables exactly as they are in the `tables_info` section.
     4. **Conclusions**: Provide any applicable conclusions.
 
     **Considerations**:
     - Use clear, simple language and avoid excessive code details.
-    - **Incorporate the provided context and tables** to enhance the explanation.
-    - Structure the output in **Markdown** format, using headings, lists, and bold text for clarity.
+    - **Incorporate the provided tables exactly as they are** into the analysis and results section. Ensure the tables are clearly referenced and interpreted where necessary.
+    - Structure the output in **Markdown** format, using appropriate headings, lists, and bold text for clarity.
+    - Ensure the **`tables_info`** provided is included exactly as it appears, without altering their format or content.
 
     **Input**: Below is the markdown and code content of the Jupyter Notebook:
 
@@ -20,11 +23,11 @@ def prompt_for_documentation(combined_content, context, tables_info):
 
     {context}
 
-    Details of the tables extracted from the code:
+    Below is the `tables_info` extracted from the code (these tables should be included exactly as they are):
 
     {tables_info}
 
-    **Expected output**: A well-organized **Markdown** document explaining the notebook, using the context and tables_info where relevant.
+    **Expected output**: A well-organized **Markdown** document explaining the notebook, ensuring that all tables mentioned in `tables_info` are included exactly as they are in the analysis and conclusions.
     """
     return prompt.format(
         combined_content=combined_content, context=context, tables_info=tables_info
@@ -50,23 +53,29 @@ def prompt_for_add_comments(code):
 
 
 def prompt_for_table_creation(code):
-    prompt = """Please analyze the Python code and extract details about the **metrics validation** steps used. Specifically, look for information regarding:
+    prompt = """Analyze the following Python code and extract details about the **metrics validation** steps. Specifically, identify the following:
 
-    - Metric names
-    - Validation types (e.g., accuracy, precision, recall, etc.)
-    - Validation methods (e.g., confusion matrix, cross-validation)
-    - Thresholds or criteria for validation
-    - Expected output or results
-    - Any comments explaining the validation steps
+    - **Metric Names**: Metrics being evaluated (e.g., accuracy, F1 score, AUC).
+    - **Validation Types**: Type of validation performed (e.g., classification, regression).
+    - **Validation Methods**: Techniques used (e.g., confusion matrix, k-fold cross-validation).
+    - **Thresholds/Criteria**: Thresholds or criteria used (e.g., precision > 0.8, recall > 0.75).
+    - **Expected Outcome**: Expected result or performance (e.g., acceptable accuracy or precision).
+    - **Comments/Explanations**: Any relevant comments or explanations in the code.
 
-    Generate the relevant details as a table in **Markdown** format with the following columns:
+    Return the extracted information in a markdown table format with the following columns:
 
-    | Metric Name     | Validation Type | Validation Method  | Threshold/Criterion | Expected Outcome | Notes/Comments |
-    |-----------------|-----------------|--------------------|---------------------|------------------|----------------|
+    - Metric Name
+    - Validation Type
+    - Validation Method
+    - Threshold/Criterion
+    - Expected Outcome
+    - Notes/Comments
 
-    Include any rows that highlight different metric validation steps or results.
+    Each row should represent a unique validation step. If multiple metrics or techniques are used, include a row for each.
 
-    Here is the code you need to analyze:
+    Only return the table, no extra explanations.
+
+    Here is the Python code to analyze:
 
     {code}
     """
@@ -98,30 +107,29 @@ def prompt_for_generation_resume(code):
 
 
 def prompt_for_review_format(markdown_text, translated_language):
-    prompt = """Review the following markdown content and ensure it adheres to the required formatting standards. 
+    prompt = """**Task:** Corrects the following Markdown content to ensure it adheres to the required formatting standards.
 
     **Formatting Guidelines:**
-    - Use appropriate headings to organize the content logically.
-    - Incorporate bullet points or numbered lists where applicable for better readability.
-    - Highlight key points using bold or italic formatting.
-    - Ensure code snippets are formatted properly (e.g., using backticks or code blocks).
-    - Check for any spelling, grammatical, or typographical errors.
+    - Structure the content with appropriate headings for clear organization.
+    - Use bullet points or numbered lists where relevant to improve readability.
+    - Highlight important points using **bold** or *italic* formatting.
+    - Format code snippets properly using backticks or code blocks.
+    - Corrects spelling, grammatical or typographical errors.
+    - Perform the translation if the content is not already in **{translated_language}**.
 
-    **Review the Markdown Text:**
+    **Markdown Text for Corrects:**
     {markdown_text}
 
-    Additionally, if necessary, translate the content into **{translated_language}** to broaden its accessibility.
-
-    Provide detailed feedback on the formatting, readability, and overall quality of the markdown content. Make any necessary adjustments to improve clarity, structure, and presentation.
+    **Expected output:** The corrected Markdown content that follows the formatting guidelines.
     """
     return prompt.format(markdown_text=markdown_text, translated_language=translated_language)
 
 
 def prompt_for_documentation_name(context):
-    prompt = """Create a concise, descriptive title for the documentation based on the context provided below. The title should accurately represent the content and be formatted appropriately for an MD (Markdown) document (e.g., no special characters that might break the formatting).
+    prompt = """Create a single, short, and descriptive file name for the Markdown documentation based on the following context. The file name should be concise, clearly represent the content, and be suitable for a .md file (avoid special characters that may affect formatting).
 
-    **Context**: {context}
+    Context: {context}
 
-    **Title**:
-        """
+    File Name:
+    """
     return prompt.format(context=context)

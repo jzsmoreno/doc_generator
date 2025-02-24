@@ -4,7 +4,12 @@ import re
 import nbformat
 from nbconvert import MarkdownExporter
 
-from doc_generator.prompts import prompt_for_add_comments
+from doc_generator.prompts import prompt_for_add_comments, system_prompt
+
+
+def format_text(input_string):
+    cleaned_string = re.sub(r"\s+", "_", input_string.strip())
+    return cleaned_string
 
 
 def clean_completion_text(completion):
@@ -42,7 +47,11 @@ def extract_cells(client, model, notebook):
             prompt = prompt_for_add_comments(cell.source)
 
             completion = client.chat.completions.create(
-                model=model, messages=[{"role": "user", "content": prompt}]
+                model=model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt},
+                ],
             )
             clean_response = clean_completion_text(completion)
             code_cells.append(clean_response)
