@@ -35,17 +35,15 @@ def prompt_for_documentation(combined_content, context, tables_info):
 
 
 def prompt_for_add_comments(code):
-    prompt = """
-    Please follow these instructions for the provided Python code:
+    prompt = """Format the following Python code according to `black` style (100-character line length).
+    Add comments explaining each section. Replace unnecessary lines with comments like:
 
-    1. Format the code according to the `black` Python code style, with a line length of 100 characters.
-    2. Add comments explaining the functionality of each section of the code.
-    3. For lines that are unnecessary or redundant, replace them with a descriptive comment such as:
-       `# This line has been replaced because it is unnecessary. The functionality it provided was previously explained above.`
-    4. Ensure that the code remains functional while improving readability with added commentary.
-    5. If a line of code is commented out, please review the readability of the comment. Make sure the comment is clear, concise, and provides context for why the line is commented out or no longer needed.
+    `# The functionality is explained above.`
 
-    Here is the code you need to modify:
+    If any line is commented out, explain why concisely. Output only the code with comments—
+    no additional information.
+
+    Here is the code to modify:
 
     {code}
     """
