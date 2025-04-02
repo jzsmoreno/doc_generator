@@ -56,7 +56,7 @@ def generate_documentation_from_api(client, markdown_content, code_content, mode
             {"role": "user", "content": prompt},
         ],
     )
-    cleaned_response = clean_completion_text(completion)
+    cleaned_response = clean_completion_text(completion, clean_spaces=False)
 
     return cleaned_response, context
 
@@ -93,7 +93,7 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
                 {"role": "user", "content": prompt},
             ],
         )
-        documentation = clean_completion_text(completion)
+        documentation = clean_completion_text(completion, clean_spaces=False)
         print("Review prompt processed and documentation cleaned.")
 
         print("Generating name for the documentation...")
@@ -117,8 +117,10 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
         if len(output_filename) > 255:
             output_filename = os.path.join("output", "unnamed_documentation.md")
         os.makedirs(os.path.dirname(output_filename), exist_ok=True)
+
         with open(output_filename, "w", encoding="utf-8") as f:
             f.write(documentation)
 
         print(f"Documentation saved in {output_filename}")
         clear_output(wait=True)
+        return output_filename, output_filename.replace("md", "pdf")

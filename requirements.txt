@@ -1,0 +1,7 @@
+openai
+nbconvert
+nbformat
+markdown 
+weasyprint
+pygobject
+pypandoc

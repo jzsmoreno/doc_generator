@@ -35,8 +35,9 @@ def prompt_for_documentation(combined_content, context, tables_info):
 
 
 def prompt_for_add_comments(code):
-    prompt = """Format the following Python code according to `black` style (100-character line length).
-    Add comments explaining each section. Replace unnecessary lines with comments like:
+    prompt = """Add brief comments to the following Python code explaining its function.
+
+    Replace unnecessary lines with comments like:
 
     `# The functionality is explained above.`
 
@@ -51,13 +52,15 @@ def prompt_for_add_comments(code):
 
 
 def prompt_for_table_creation(code):
-    prompt = """Analyze the following Python code and extract details about the **metrics validation** steps. Specifically, identify the following:
+    prompt = (
+        prompt
+    ) = """Analyze the following Python code and extract details about the **metrics validation** steps. Specifically, identify the following information:
 
-    - **Metric Names**: Metrics being evaluated (e.g., accuracy, F1 score, AUC).
+    - **Metric Names**: Metrics being evaluated (e.g., accuracy, F1 score, AUC), if available.
     - **Validation Types**: Type of validation performed (e.g., classification, regression).
-    - **Validation Methods**: Techniques used (e.g., confusion matrix, k-fold cross-validation).
-    - **Thresholds/Criteria**: Thresholds or criteria used (e.g., precision > 0.8, recall > 0.75).
-    - **Expected Outcome**: Expected result or performance (e.g., acceptable accuracy or precision).
+    - **Validation Methods**: Techniques used (e.g., confusion matrix, k-fold cross-validation), if available..
+    - **Thresholds/Criteria**: Thresholds or criteria used (e.g., precision > 0.8, recall > 0.75), if applicable.
+    - **Expected Outcome**: Expected result or performance (e.g., acceptable accuracy or precision), if mentioned.
     - **Comments/Explanations**: Any relevant comments or explanations in the code.
 
     Return the extracted information in a markdown table format with the following columns:
@@ -69,8 +72,9 @@ def prompt_for_table_creation(code):
     - Expected Outcome
     - Notes/Comments
 
-    Each row should represent a unique validation step. If multiple metrics or techniques are used, include a row for each.
+    If no **specific metrics** (e.g., accuracy, F1 score) are found in the code, return a table with details about the **validation types**, **methods**, and **any criteria or expected outcomes** based on the available code, excluding metric names.
 
+    Each row should represent a unique validation step. If multiple techniques or steps are used, include a row for each.
     Only return the table, no extra explanations.
 
     Here is the Python code to analyze:
