@@ -109,6 +109,7 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
         doc_name = format_text(doc_name)
         metadata_name = notebook["metadata"].get("name", "unnamed")
         doc_name = doc_name if metadata_name == "unnamed" else metadata_name
+        doc_name = doc_name.replace(".", "") if doc_name.endswith(".") else doc_name
         doc_name = doc_name.replace(".md", "") if doc_name.endswith(".md") else doc_name
         output_filename = os.path.join("output", f"{doc_name}.md")
         print(f"Generated documentation name: {doc_name}")

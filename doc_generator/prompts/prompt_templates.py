@@ -2,32 +2,33 @@ system_prompt = "You are an AI designed to provide direct answers to questions. 
 
 
 def prompt_for_documentation(combined_content, context, tables_info):
-    prompt = """**Instructions**: Below is the content of a Jupyter Notebook in markdown and code format. Your task is to create clear and structured documentation that covers the purpose, methodology, analysis, results, and conclusions of the notebook. Organize it into the following sections:
+    prompt = """
+    **Instructions**: Below is the content of a Jupyter Notebook in markdown and code format. Your task is to create clear and structured documentation that covers the purpose, methodology, analysis, results, and conclusions of the notebook. Organize it into the following sections:
 
-    1. **Introduction**: Briefly describe the main goal of the notebook.
-    2. **Methodology**: Summarize the key steps and processes followed.
-    3. **Analysis and Results**: Outline the analysis and results obtained, including references to any tables. Include the tables exactly as they are in the `tables_info` section.
-    4. **Conclusions**: Provide any applicable conclusions.
+        1. **Introduction**: Briefly describe the main goal of the notebook.
+        2. **Methodology**: Summarize the key steps and processes followed.
+        3. **Analysis and Results**: Outline the analysis and results obtained, including references to any tables. Include the tables exactly as they are in the `tables_info` section.
+        4. **Conclusions**: Provide any applicable conclusions.
 
-    **Considerations**:
-    - Use clear, simple language and avoid excessive code details.
-    - **Incorporate the provided tables exactly as they are** into the analysis and results section. Ensure the tables are clearly referenced and interpreted where necessary.
-    - Structure the output in **Markdown** format, using appropriate headings, lists, and bold text for clarity.
-    - Ensure the **`tables_info`** provided is included exactly as it appears, without altering their format or content.
+        **Considerations**:
+        - Use clear, simple language and avoid excessive code details.
+        - **Incorporate the provided tables exactly as they are** into the analysis and results section. Ensure the tables are clearly referenced and interpreted where necessary.
+        - Structure the output in **Markdown** format, using appropriate headings, lists, and bold text for clarity.
+        - Ensure the **`tables_info`** provided is included exactly as it appears, without altering their format or content.
 
-    **Input**: Below is the markdown and code content of the Jupyter Notebook:
+        **Input**: Below is the markdown and code content of the Jupyter Notebook:
 
-    {combined_content}
+        {combined_content}
 
-    Context for the notebook:
+        Context for the notebook:
 
-    {context}
+        {context}
 
-    Below is the `tables_info` extracted from the code (these tables should be included exactly as they are):
+        Below is the `tables_info` extracted from the code (these tables should be included exactly as they are):
 
-    {tables_info}
+        {tables_info}
 
-    **Expected output**: A well-organized **Markdown** document explaining the notebook, ensuring that all tables mentioned in `tables_info` are included exactly as they are in the analysis and conclusions.
+        **Expected output**: A well-organized **Markdown** document explaining the notebook, ensuring that all tables mentioned in `tables_info` are included exactly as they are in the analysis and conclusions.
     """
     return prompt.format(
         combined_content=combined_content, context=context, tables_info=tables_info
@@ -35,18 +36,18 @@ def prompt_for_documentation(combined_content, context, tables_info):
 
 
 def prompt_for_add_comments(code):
-    prompt = """Add brief comments to the following Python code explaining its function.
+    prompt = """
+    Task: Add brief comment to the following Python code explaining its function.
 
-    Replace unnecessary lines with comments like:
+        Replace unnecessary lines with a comment like:
 
-    `# The functionality is explained above.`
+        `# The functionality is explained above.`
 
-    If any line is commented out, explain why concisely. Output only the code with comments—
-    no additional information.
+        If any line is commented out, explain why concisely. Output only the code with comments no additional information.
 
-    Here is the code to modify:
+        Here is the code to modify:
 
-    {code}
+        {code}
     """
     return prompt.format(code=code)
 
@@ -54,16 +55,17 @@ def prompt_for_add_comments(code):
 def prompt_for_table_creation(code):
     prompt = (
         prompt
-    ) = """Analyze the following Python code and extract details about the **metrics validation** steps. Specifically, identify the following information:
+    ) = """
+    Task: Analyze the following Python code and extract details about the **metrics validation** steps. Specifically, identify the following:
 
-    - **Metric Names**: Metrics being evaluated (e.g., accuracy, F1 score, AUC), if available.
-    - **Validation Types**: Type of validation performed (e.g., classification, regression).
-    - **Validation Methods**: Techniques used (e.g., confusion matrix, k-fold cross-validation), if available..
-    - **Thresholds/Criteria**: Thresholds or criteria used (e.g., precision > 0.8, recall > 0.75), if applicable.
-    - **Expected Outcome**: Expected result or performance (e.g., acceptable accuracy or precision), if mentioned.
+    - **Metric Names**: Metrics being evaluated (e.g., accuracy, F1 score, AUC).
+    - **Validation Types**: Type of validation (e.g., classification, regression).
+    - **Validation Methods**: Techniques used (e.g., confusion matrix, k-fold cross-validation).
+    - **Thresholds/Criteria**: Thresholds or criteria (e.g., precision > 0.8, recall > 0.75).
+    - **Expected Outcome**: Expected result or performance (e.g., acceptable accuracy or precision).
     - **Comments/Explanations**: Any relevant comments or explanations in the code.
 
-    Return the extracted information in a markdown table format with the following columns:
+    Return the extracted information in a markdown table with these columns:
 
     - Metric Name
     - Validation Type
@@ -72,10 +74,7 @@ def prompt_for_table_creation(code):
     - Expected Outcome
     - Notes/Comments
 
-    If no **specific metrics** (e.g., accuracy, F1 score) are found in the code, return a table with details about the **validation types**, **methods**, and **any criteria or expected outcomes** based on the available code, excluding metric names.
-
-    Each row should represent a unique validation step. If multiple techniques or steps are used, include a row for each.
-    Only return the table, no extra explanations.
+    If no specific metrics (e.g., accuracy, F1 score) are found, return a summary instead of a table.
 
     Here is the Python code to analyze:
 
@@ -85,25 +84,26 @@ def prompt_for_table_creation(code):
 
 
 def prompt_for_generation_resume(code):
-    prompt = """Provide a detailed summary of the Python code with the following structure:
+    prompt = """
+    Provide a summary of the Python code with the following structure:
 
-    1. **Purpose**: Explain the main goal of the code. What problem does it solve or what task does it perform?
-    2. **Key Functionalities**: Describe the main functions or processes the code executes. What are its core operations?
-    3. **Components**: 
-    - Libraries/Modules: Mention any important libraries or modules the code utilizes.
-    - Inputs: What kind of data or parameters does the code require to function?
-    - Outputs: What does the code return or produce after execution?
-    4. **Steps/Process**: Outline the significant steps or processes the code follows to accomplish its task.
-    5. **Additional Information**:
-    - Performance Considerations: Are there any optimizations or efficiency factors to be aware of?
-    - Use Cases: What scenarios or problems can the code be applied to?
-    - Limitations: Mention any known limitations or constraints of the code.
+        1. **Purpose**: Explain the main goal of the code. What problem does it solve or what task does it perform?
+        2. **Key Functionalities**: Describe the main functions or processes the code executes. What are its core operations?
+        3. **Components**: 
+        - Libraries/Modules: Mention any important libraries or modules the code utilizes.
+        - Inputs: What kind of data or parameters does the code require to function?
+        - Outputs: What does the code return or produce after execution?
+        4. **Steps/Process**: Outline the significant steps or processes the code follows to accomplish its task.
+        5. **Additional Information**:
+        - Performance Considerations: Are there any optimizations or efficiency factors to be aware of?
+        - Use Cases: What scenarios or problems can the code be applied to?
+        - Limitations: Mention any known limitations or constraints of the code.
 
-    Avoid including any actual code. Focus on describing how the code operates and what it achieves.
+        Avoid including any actual code. Focus on describing how the code operates and what it achieves.
 
-    Here is the Python code you need to summarize:
+        Here is the Python code you need to summarize:
 
-    {code}
+        {code}
     """
     return prompt.format(code=code)
 
