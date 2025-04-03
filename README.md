@@ -11,6 +11,7 @@ Run the following commands to install the required system libraries:
 ```bash
 sudo apt-get update
 sudo apt install pandoc
+sudo apt-get install texlive-xetex
 sudo apt-get install -y libgobject-2.0-0 libpango-1.0-0 libcairo2
 ```
 
@@ -21,6 +22,7 @@ On macOS, you can use Homebrew to install the necessary libraries:
 ```bash
 brew install gtk+3
 brew install pandoc
+brew install --cask mactex
 brew unlink glib && brew link glib
 brew install cairo pango gobject-introspection gdk-pixbuf
 brew install weasyprint
@@ -39,4 +41,12 @@ Manual symlinking, instead of linking each library individually to `/usr/local/l
 
 ```bash
 sudo ln -s /opt/homebrew/lib /usr/local/lib
+```
+
+For Windows:
+
+Install MiKTeX (another TeX distribution) or TeX Live.
+
+```bash
+xelatex --version
 ```

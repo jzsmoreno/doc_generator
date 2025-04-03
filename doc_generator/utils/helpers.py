@@ -5,7 +5,8 @@ import re
 import subprocess
 
 import black
-import markdown
+
+# import markdown
 import nbformat
 from nbconvert import MarkdownExporter
 
@@ -33,7 +34,26 @@ def md_to_pdf(markdown_file, output_pdf):
         css_file = "style.css"  # Optional: Path to your CSS file for styling
 
         # Build the pandoc command
-        command = ["pandoc", markdown_file, "--css", css_file, "-o", output_pdf]
+        command = [
+            "pandoc",
+            markdown_file,
+            "--pdf-engine=xelatex",
+            "--variable",
+            "mainfont=Times New Roman",
+            "--variable",
+            "fontsize=12pt",
+            "-o",
+            output_pdf,
+            "--table-of-contents",
+            "--variable",
+            "tables=yes",
+            "--variable",
+            "list=true",
+            "--css",
+            css_file,
+            "--variable",
+            "geometry:margin=1in",
+        ]
         subprocess.run(command, check=True)
         # Convert Markdown to HTML using markdown library
         # html = markdown.markdown(open(markdown_file, "r", encoding="utf-8").read())
@@ -55,10 +75,11 @@ def format_text(input_string):
 
 
 def clean_completion_text(completion, clean_spaces=True):
-    response_text = completion.choices[0].message.content.strip()
+    response_text = completion.choices[0].message.content
     cleaned_response = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL)
 
     if clean_spaces:
+        cleaned_response = cleaned_response.strip()
         # Eliminar líneas vacías o con solo espacios
         cleaned_response = re.sub(r"\n\s*\n", "\n", cleaned_response)
         # Eliminar espacios al principio y al final de cada línea

@@ -58,23 +58,19 @@ def prompt_for_table_creation(code):
     ) = """
     Task: Analyze the following Python code and extract details about the **metrics validation** steps. Specifically, identify the following:
 
-    - **Metric Names**: Metrics being evaluated (e.g., accuracy, F1 score, AUC).
-    - **Validation Types**: Type of validation (e.g., classification, regression).
-    - **Validation Methods**: Techniques used (e.g., confusion matrix, k-fold cross-validation).
-    - **Thresholds/Criteria**: Thresholds or criteria (e.g., precision > 0.8, recall > 0.75).
-    - **Expected Outcome**: Expected result or performance (e.g., acceptable accuracy or precision).
-    - **Comments/Explanations**: Any relevant comments or explanations in the code.
+    - **Metric**: Metrics being evaluated (e.g., accuracy, F1 score, AUC).
+    - **Threshold**: Thresholds or criteria (e.g., precision > 0.8, recall > 0.75).
+    - **Outcome**: Expected result or performance (e.g., acceptable accuracy or precision).
+    - **Notes**: Any relevant comments or explanations in the code.
 
     Return the extracted information in a markdown table with these columns:
 
-    - Metric Name
-    - Validation Type
-    - Validation Method
-    - Threshold/Criterion
-    - Expected Outcome
-    - Notes/Comments
+    - Metric
+    - Threshold
+    - Outcome
+    - Notes
 
-    If no specific metrics (e.g., accuracy, F1 score) are found, return a summary instead of a table.
+    If no specific metrics (e.g., accuracy, F1 score) are found, return a summary instead of a the given information.
 
     Here is the Python code to analyze:
 

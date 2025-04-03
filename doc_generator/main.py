@@ -41,6 +41,7 @@ def generate_documentation_from_api(client, markdown_content, code_content, mode
     )
     response_text = completion.choices[0].message.content
     tables_info = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL)
+    tables_info += "\n"
     print("Tables generated successfully.")
 
     combined_content = (
