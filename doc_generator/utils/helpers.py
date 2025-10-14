@@ -93,13 +93,15 @@ def clean_completion_text(completion, clean_spaces=True):
 # Step 1: Load all notebooks from the 'notebooks' folder
 def load_notebooks(directory="notebooks"):
     notebooks = []
+    names = []
     for filename in os.listdir(directory):
         if filename.endswith(".ipynb"):
             filepath = os.path.join(directory, filename)
             with open(filepath, "r", encoding="utf-8") as file:
                 notebook = nbformat.read(file, as_version=4)
                 notebooks.append(notebook)
-    return notebooks
+                names.append(filename)
+    return notebooks, names
 
 
 # Step 2: Extract markdown and code cells from the notebook

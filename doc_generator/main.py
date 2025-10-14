@@ -70,10 +70,11 @@ def generate_documentation_from_api(client, markdown_content, code_content, mode
 
 # Step 5: Process all notebooks and generate documentation
 def process_notebooks(client, model, directory="notebooks", language="english"):
-    notebooks = load_notebooks(directory)
+    notebooks, names = load_notebooks(directory)
     num_notebooks = len(notebooks)
     print(f"Found {num_notebooks} notebooks in the directory: {directory}")
-    for notebook in notebooks:
+    for i, notebook in enumerate(notebooks):
+        print(f"Notebook name : {names[i]}")
         print(f"Processing notebook number {notebooks.index(notebook) + 1} of {num_notebooks}...")
         print("Extracting markdown and code content...")
         # Extract markdown and code content
