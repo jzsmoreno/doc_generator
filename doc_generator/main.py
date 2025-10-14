@@ -11,7 +11,13 @@ from doc_generator.prompts import (
     prompt_for_table_creation,
     system_prompt,
 )
-from doc_generator.utils import clean_completion_text, extract_cells, format_text, load_notebooks
+from doc_generator.utils import (
+    clean_completion_text,
+    extract_cells,
+    format_text,
+    load_notebooks,
+    md_to_pdf,
+)
 
 
 # Step 3: Send content (markdown + code) to an API for documentation generation
@@ -125,4 +131,5 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
 
         print(f"Documentation saved in {output_filename}")
         clear_output(wait=True)
-        return output_filename, output_filename.replace("md", "pdf")
+        markdown_file, output_pdf = output_filename, output_filename.replace("md", "pdf")
+        md_to_pdf(markdown_file, output_pdf)
