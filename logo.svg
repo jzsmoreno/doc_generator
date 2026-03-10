@@ -1,0 +1,35 @@
+<svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- background -->
+  <rect width="128" height="128" rx="22" fill="#1e1e2e"/>
+
+  <!-- notebook -->
+  <rect x="22" y="26" width="54" height="76" rx="10" fill="#2f81f7"/>
+
+  <!-- notebook cells -->
+  <rect x="32" y="42" width="34" height="6" rx="3" fill="#e6edf3"/>
+  <rect x="32" y="56" width="34" height="6" rx="3" fill="#e6edf3"/>
+  <rect x="32" y="70" width="22" height="6" rx="3" fill="#e6edf3"/>
+
+  <!-- AI nodes -->
+  <circle cx="92" cy="42" r="7" fill="#a371f7"/>
+  <circle cx="108" cy="56" r="6" fill="#a371f7"/>
+  <circle cx="88" cy="62" r="5" fill="#a371f7"/>
+
+  <!-- connections -->
+  <line x1="92" y1="42" x2="108" y2="56" stroke="#a371f7" stroke-width="3"/>
+  <line x1="92" y1="42" x2="88" y2="62" stroke="#a371f7" stroke-width="3"/>
+
+  <!-- arrow to documentation -->
+  <path d="M80 84 L104 84 L98 78 M104 84 L98 90"
+        stroke="#58a6ff"
+        stroke-width="4"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- doc lines -->
+  <rect x="82" y="96" width="30" height="4" rx="2" fill="#c9d1d9"/>
+  <rect x="82" y="104" width="22" height="4" rx="2" fill="#c9d1d9"/>
+
+</svg>
