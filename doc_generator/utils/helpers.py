@@ -147,6 +147,26 @@ def extract_cells(client, model, notebook):
 
             # Clean the response from the completion and add to code cells
             clean_response = clean_completion_text(completion)
+
+            # Extract outputs from the cell if they exist
+            cell_outputs = []
+            if hasattr(cell, "outputs") and cell.outputs:
+                for output in cell.outputs:
+                    if "text" in output:
+                        cell_outputs.append(output["text"])
+                    elif "data" in output:
+                        # Handle different output types (text, images, etc.)
+                        for key, value in output["data"].items():
+                            if key.startswith("text/"):
+                                cell_outputs.append(value)
+                            elif key == "text/plain":
+                                cell_outputs.append(value)
+
+            # Combine the commented code with any outputs
+            if cell_outputs:
+                output_text = "\n\n# Output:\n" + "\n".join(cell_outputs)
+                clean_response += output_text
+
             code_cells.append(clean_response)
 
     return markdown_cells, code_cells
