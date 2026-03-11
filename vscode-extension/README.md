@@ -80,7 +80,7 @@ Set your OpenAI API key in one of these ways:
 
 2. **VS Code Settings**:
    - Open VS Code Settings (`Ctrl+,`)
-   - Search for `notebook documentation generator`
+   - Search for `Notebook Doc Assistant`
    - Enter your API key in the settings
 
 ## Usage

@@ -5,15 +5,14 @@ This module allows running the tool via: python -m core [options]
 
 import argparse
 import os
-import sys
 import signal
+import sys
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from core.main import cancel_generation
 from openai import OpenAI
-
-from core.main import process_notebooks, cancel_generation, is_cancelled
 
 
 def signal_handler(signum, frame):
@@ -117,11 +116,18 @@ def setup_environment():
         print("Created 'output' directory.")
 
 
-def process_single_notebook(client, model, notebook_path, output_dir, no_pdf=False):
+def process_single_notebook(
+    client, model, notebook_path, output_dir, no_pdf=False, language="english"
+):
     """Process a single notebook file."""
-    from core.main import generate_documentation_from_api
-    from core.utils.helpers import extract_cells, md_to_pdf
     import nbformat
+    from core.main import (
+        clean_completion_text,
+        generate_documentation_from_api,
+        prompt_for_review_format,
+        system_prompt,
+    )
+    from core.utils.helpers import extract_cells, md_to_pdf
 
     print(f"\nProcessing notebook: {notebook_path}")
 
@@ -140,6 +146,16 @@ def process_single_notebook(client, model, notebook_path, output_dir, no_pdf=Fal
     documentation, context = generate_documentation_from_api(
         client, markdown_content, code_content, model
     )
+
+    prompt = prompt_for_review_format(documentation, language)
+    completion = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": prompt},
+        ],
+    )
+    documentation = clean_completion_text(completion, clean_spaces=False)
 
     # Get output filename
     basename = os.path.basename(notebook_path).replace(".ipynb", "")
@@ -199,7 +215,7 @@ def main():
             print(f"Error: {input_path} is not a Jupyter notebook (.ipynb)")
             sys.exit(1)
 
-        process_single_notebook(client, model, input_path, output_dir, args.no_pdf)
+        process_single_notebook(client, model, input_path, output_dir, args.no_pdf, args.language)
 
     elif os.path.isdir(input_path):
         # Directory - process all notebooks
@@ -219,7 +235,9 @@ def main():
         # Process each notebook
         for notebook_file in notebook_files:
             try:
-                process_single_notebook(client, model, notebook_file, output_dir, args.no_pdf)
+                process_single_notebook(
+                    client, model, notebook_file, output_dir, args.no_pdf, args.language
+                )
             except Exception as e:
                 print(f"Error processing {notebook_file}: {e}")
                 continue

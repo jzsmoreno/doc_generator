@@ -1,7 +1,8 @@
 import os
 import sys
-from openai import OpenAI
+
 import nbformat
+from openai import OpenAI
 
 # Add the doc_generator directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

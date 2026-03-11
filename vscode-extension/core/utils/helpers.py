@@ -8,9 +8,8 @@ import black
 
 # import markdown
 import nbformat
-from nbconvert import MarkdownExporter
-
 from core.prompts import prompt_for_add_comments, system_prompt
+from nbconvert import MarkdownExporter
 
 # from weasyprint import HTML
 

@@ -2,8 +2,6 @@ import os
 import re
 import threading
 
-from IPython.display import clear_output
-
 from core.prompts import (
     prompt_for_documentation,
     prompt_for_documentation_name,
@@ -12,14 +10,8 @@ from core.prompts import (
     prompt_for_table_creation,
     system_prompt,
 )
-from core.utils import (
-    clean_completion_text,
-    extract_cells,
-    format_text,
-    load_notebooks,
-    md_to_pdf,
-)
-
+from core.utils import clean_completion_text, extract_cells, format_text, load_notebooks, md_to_pdf
+from IPython.display import clear_output
 
 # Global cancellation flag
 _cancellation_requested = threading.Event()

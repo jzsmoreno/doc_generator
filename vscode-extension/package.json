@@ -2,7 +2,7 @@
   "name": "notebook-doc-assistant",
   "displayName": "Notebook Doc Assistant",
   "description": "Generate comprehensive documentation from Jupyter notebooks using AI",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "icon": "logo.png",
   "publisher": "jzsmoreno",
   "license": "MIT",
@@ -99,7 +99,7 @@
         "notebookDocGenerator.apiBaseUrl": {
           "type": "string",
           "default": "",
-          "description": "Custom API base URL for local models (e.g., http://localhost:11434 for Ollama, http://localhost:1234/v1 for LMStudio)"
+          "description": "Custom API base URL for local models (e.g., http://localhost:11434/v1 for Ollama, http://localhost:1234/v1 for LMStudio)"
         }
       }
     }

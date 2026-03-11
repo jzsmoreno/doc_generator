@@ -1,8 +1,8 @@
 import signal
 import sys
-from openai import OpenAI
 
-from core.main import process_notebooks, cancel_generation
+from core.main import cancel_generation, process_notebooks
+from openai import OpenAI
 
 
 def signal_handler(signum, frame):
