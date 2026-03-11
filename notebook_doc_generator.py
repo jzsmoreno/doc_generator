@@ -1,6 +1,20 @@
+import signal
+import sys
 from openai import OpenAI
 
-from doc_generator.main import process_notebooks
+from core.main import process_notebooks, cancel_generation
+
+
+def signal_handler(signum, frame):
+    """Handle Ctrl+C signal to gracefully cancel generation."""
+    print("\n\nCtrl+C detected! Requesting cancellation...")
+    cancel_generation()
+    print("Please wait for current task to finish...")
+
+
+# Register signal handler
+signal.signal(signal.SIGINT, signal_handler)
+signal.signal(signal.SIGTERM, signal_handler)
 
 
 # Example API call setup (replace with your actual API URL and key if needed)

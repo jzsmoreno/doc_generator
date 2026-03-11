@@ -1,0 +1,126 @@
+{
+  "name": "notebook-doc-assistant",
+  "displayName": "Notebook Doc Assistant",
+  "description": "Generate comprehensive documentation from Jupyter notebooks using AI",
+  "version": "0.3.0",
+  "icon": "logo.png",
+  "publisher": "jzsmoreno",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jzsmoreno/doc_generator.git"
+  },
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "Data Science"
+  ],
+  "keywords": [
+    "jupyter",
+    "notebook",
+    "documentation",
+    "ai",
+    "openai",
+    "markdown",
+    "pdf"
+  ],
+  "activationEvents": [
+    "onCommand:extension.generateNotebookDocumentation",
+    "onCommand:extension.generateSelectedNotebookDocumentation",
+    "onCommand:extension.generateFolderDocumentation",
+    "onLanguage:jupyter"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.generateNotebookDocumentation",
+        "title": "Generate Documentation for Notebook",
+        "category": "Notebook Documentation"
+      },
+      {
+        "command": "extension.generateFolderDocumentation",
+        "title": "Generate Documentation for Folder",
+        "category": "Notebook Documentation"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "when": "resourceExtname == .ipynb",
+          "command": "extension.generateNotebookDocumentation",
+          "group": "notebook"
+        },
+        {
+          "when": "resourceScheme == file && explorerResourceIsFolder",
+          "command": "extension.generateFolderDocumentation",
+          "group": "notebook"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "resourceExtname == .ipynb",
+          "command": "extension.generateNotebookDocumentation",
+          "group": "notebook"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Notebook Documentation Generator",
+      "properties": {
+        "notebookDocGenerator.openaiApiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key for documentation generation"
+        },
+        "notebookDocGenerator.model": {
+          "type": "string",
+          "default": "gpt-4",
+          "description": "AI model to use for generation (e.g., gpt-4, gpt-3.5-turbo, llama2, codellama)"
+        },
+        "notebookDocGenerator.language": {
+          "type": "string",
+          "default": "english",
+          "description": "Language for generated documentation"
+        },
+        "notebookDocGenerator.generatePdf": {
+          "type": "boolean",
+          "default": true,
+          "description": "Generate PDF in addition to markdown"
+        },
+        "notebookDocGenerator.pythonPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to Python executable (leave empty to use default)"
+        },
+        "notebookDocGenerator.apiBaseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Custom API base URL for local models (e.g., http://localhost:11434 for Ollama, http://localhost:1234/v1 for LMStudio)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "@types/node": "16.x",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "child_process": "^1.0.2"
+  }
+}

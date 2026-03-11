@@ -6,7 +6,7 @@ import nbformat
 # Add the doc_generator directory to the path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from doc_generator.utils.helpers import extract_cells
+from core.utils.helpers import extract_cells
 
 
 def test_extract_cells():

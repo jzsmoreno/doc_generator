@@ -1,9 +1,10 @@
 import os
 import re
+import threading
 
 from IPython.display import clear_output
 
-from doc_generator.prompts import (
+from core.prompts import (
     prompt_for_documentation,
     prompt_for_documentation_name,
     prompt_for_generation_resume,
@@ -11,7 +12,7 @@ from doc_generator.prompts import (
     prompt_for_table_creation,
     system_prompt,
 )
-from doc_generator.utils import (
+from core.utils import (
     clean_completion_text,
     extract_cells,
     format_text,
@@ -20,9 +21,33 @@ from doc_generator.utils import (
 )
 
 
+# Global cancellation flag
+_cancellation_requested = threading.Event()
+_cancellation_lock = threading.Lock()
+
+
+def is_cancelled():
+    """Check if cancellation has been requested."""
+    return _cancellation_requested.is_set()
+
+
+def cancel_generation():
+    """Request cancellation of the current generation process."""
+    with _cancellation_lock:
+        _cancellation_requested.set()
+    print("\nCancellation requested. Finishing current task...")
+
+
+def reset_cancellation():
+    """Reset the cancellation flag for a new generation process."""
+    _cancellation_requested.clear()
+
+
 # Step 3: Send content (markdown + code) to an API for documentation generation
 def generate_documentation_from_api(client, markdown_content, code_content, model):
     """Processes extracted content with OpenAI API."""
+    if is_cancelled():
+        return None, None
 
     print("Generating resume for code content...")
     prompt = prompt_for_generation_resume(code_content)
@@ -35,6 +60,9 @@ def generate_documentation_from_api(client, markdown_content, code_content, mode
     )
     context = clean_completion_text(completion)
     print("Resume generated successfully.")
+    # Check for cancellation after first API call
+    if is_cancelled():
+        return None, context
 
     print("Generating tables for code content...")
     prompt = prompt_for_table_creation(code_content)
@@ -49,6 +77,9 @@ def generate_documentation_from_api(client, markdown_content, code_content, mode
     tables_info = re.sub(r"<think>.*?</think>", "", response_text, flags=re.DOTALL)
     tables_info += "\n"
     print("Tables generated successfully.")
+    # Check for cancellation after second API call
+    if is_cancelled():
+        return None, context
 
     combined_content = (
         "\n\n**Markdown Cells**\n\n" + markdown_content + "\n\n**Code Cells**\n\n" + code_content
@@ -70,10 +101,16 @@ def generate_documentation_from_api(client, markdown_content, code_content, mode
 
 # Step 5: Process all notebooks and generate documentation
 def process_notebooks(client, model, directory="notebooks", language="english"):
+    # Reset cancellation flag at the start
+    reset_cancellation()
     notebooks, names = load_notebooks(directory)
     num_notebooks = len(notebooks)
     print(f"Found {num_notebooks} notebooks in the directory: {directory}")
     for i, notebook in enumerate(notebooks):
+        # Check for cancellation before processing each notebook
+        if is_cancelled():
+            print(f"\nCancellation accepted. Stopping after {i} notebook(s).")
+            break
         print(f"Notebook name : {names[i]}")
         print(f"Processing notebook number {notebooks.index(notebook) + 1} of {num_notebooks}...")
         print("Extracting markdown and code content...")
@@ -90,6 +127,10 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
         documentation, context = generate_documentation_from_api(
             client, markdown_content, code_content, model
         )
+        # Check for cancellation after documentation generation
+        if is_cancelled() or documentation is None:
+            print(f"\nStopping notebook processing. Documentation for this notebook was not saved.")
+            break
         print("Documentation generated successfully.")
 
         print("Generating review prompt for documentation...")
@@ -103,6 +144,10 @@ def process_notebooks(client, model, directory="notebooks", language="english"):
         )
         documentation = clean_completion_text(completion, clean_spaces=False)
         print("Review prompt processed and documentation cleaned.")
+        # Check for cancellation after review prompt
+        if is_cancelled():
+            print(f"\nStopping notebook processing. Documentation for this notebook was not saved.")
+            break
 
         print("Generating name for the documentation...")
         prompt = prompt_for_documentation_name(context)

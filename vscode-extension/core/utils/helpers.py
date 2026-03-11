@@ -10,7 +10,7 @@ import black
 import nbformat
 from nbconvert import MarkdownExporter
 
-from doc_generator.prompts import prompt_for_add_comments, system_prompt
+from core.prompts import prompt_for_add_comments, system_prompt
 
 # from weasyprint import HTML
 
