@@ -38,14 +38,18 @@ export OPENAI_API_KEY=your-api-key-here
 export API_BASE_URL=https://api.openai.com/v1
 ```
 
-**Option B: Local Models (Ollama, LM Studio)**
+**Option A: OpenAI/LM-Studio/Ollama**
+```
+export OPENAI_API_KEY=sk-...          # Cloud (optional)
+export API_BASE_URL=http://localhost:11434/v1  # Local Ollama
+# or API_BASE_URL=https://api.openai.com/v1   # OpenAI cloud
+```
 
-```bash
-# For Ollama
-export API_BASE_URL=http://localhost:11434/v1
-
-# For LM Studio
-export API_BASE_URL=http://127.0.0.1:1234/v1
+**Option B: Anthropic/Claude**
+```
+export ANTHROPIC_BASE_URL=https://api.anthropic.com
+export ANTHROPIC_AUTH_TOKEN=your-token
+export ANTHROPIC_MODEL=claude-3-5-sonnet-20240620  # Optional
 ```
 
 ### 3. Use the CLI
@@ -63,8 +67,17 @@ python -m core path/to/notebooks output
 # Generate only markdown (skip PDF)
 python -m core path/to/notebook.ipynb --no-pdf
 
-# Use a specific model
-python -m core path/to/notebook.ipynb --model gpt-4
+# OpenAI (default/local)
+python -m core notebooks --model gpt-4o
+
+# Local Ollama
+python -m core notebooks --model llama3 --api-base http://localhost:11434/v1
+
+# Anthropic
+python -m core notebooks --provider anthropic --model claude-3-5-sonnet-20240620
+
+# List models/info
+python -m core --list-models --provider anthropic
 
 # Generate in a different language
 python -m core path/to/notebook.ipynb --language spanish

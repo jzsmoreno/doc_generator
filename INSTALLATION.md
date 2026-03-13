@@ -96,14 +96,16 @@ $env:OPENAI_API_KEY="your-api-key-here"
 2. Search for `notebook documentation generator`
 3. Add your API key to `notebookDocGenerator.openaiApiKey`
 
-#### Option B: Local Models (Ollama, LM Studio)
+**OpenAI/LM-Studio/Ollama (`--provider openai`):**
+```
+export OPENAI_API_KEY=sk-...  # Optional for local
+export API_BASE_URL=http://localhost:11434/v1  # Ollama
+```
 
-```bash
-# For Ollama
-export API_BASE_URL=http://localhost:11434/
-
-# For LM Studio
-export API_BASE_URL=http://127.0.0.1:1234/v1
+**Anthropic/Claude (`--provider anthropic`):**
+```
+export ANTHROPIC_BASE_URL=https://api.anthropic.com
+export ANTHROPIC_AUTH_TOKEN=your-token
 ```
 
 ### Step 4: Verify Installation

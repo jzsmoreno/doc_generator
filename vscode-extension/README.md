@@ -123,7 +123,8 @@ The extension supports the following VS Code settings:
 - `notebookDocGenerator.language` - Documentation language (default: english)
 - `notebookDocGenerator.generatePdf` - Generate PDF in addition to Markdown (default: true)
 - `notebookDocGenerator.pythonPath` - Custom Python executable path (auto-detected by default)
-- `notebookDocGenerator.apiBaseUrl` - Custom API base URL for local models
+**New:** `notebookDocGenerator.provider` - `"openai"` or `"anthropic"`
+`notebookDocGenerator.apiBaseUrl` - OpenAI-compatible URL (Ollama/LM-Studio)
 
 ## Output
 
