@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { OutputChannel } from './outputChannel';
 import { registerCommands } from './commands';
 import { checkPythonEnvironment } from './pythonEnvironment';
+import { ConfigManager } from './configManager';
 
 let outputChannel: OutputChannel;
 
@@ -28,6 +29,18 @@ export function activate(context: vscode.ExtensionContext) {
     
     // Register commands - pass extension URI for self-contained core module
     registerCommands(context, outputChannel, context.extensionUri);
+    
+    // Listen for config changes to sync provider defaults
+    vscode.workspace.onDidChangeConfiguration(async (e) => {
+        if (e.affectsConfiguration('notebookDocGenerator.provider')) {
+            try {
+                const configManager = new ConfigManager();
+                await configManager.syncProviderDefaults();
+            } catch (error) {
+                console.error('Provider sync failed:', error);
+            }
+        }
+    }, null, context.subscriptions);
     
     // Show activation message
     vscode.window.showInformationMessage('Notebook Documentation Generator extension activated!');

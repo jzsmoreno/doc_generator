@@ -12,6 +12,7 @@ export interface PythonCLIRunResult {
 }
 
 export interface CLIConfig {
+    provider?: string;
     model?: string;
     language?: string;
     generatePdf?: boolean;
@@ -98,6 +99,11 @@ export async function runPythonCLI(
             // Add language if specified
             if (config?.language) {
                 cliArgs += ` --language ${config.language}`;
+            }
+            
+            // Add provider if specified
+            if (config?.provider) {
+                cliArgs += ` --provider ${config.provider}`;
             }
             
             // Add API key if specified

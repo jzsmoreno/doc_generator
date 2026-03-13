@@ -72,14 +72,15 @@ Examples:
     )
 
     parser.add_argument(
-        "--provider", 
-        choices=["openai", "anthropic"], 
+        "--provider",
+        choices=["openai", "ollama", "lmstudio", "claude"],
         default="openai",
-        help="LLM provider: openai (default, LM-Studio/Ollama compatible) or anthropic"
+        help="LLM provider (openai, ollama/LMStudio local via api-base, claude/Anthropic)",
     )
-    
+
     parser.add_argument(
-        "--api-base", help="Custom API base URL for OpenAI-compatible (e.g., http://localhost:11434/v1)"
+        "--api-base",
+        help="Custom API base URL for OpenAI-compatible (e.g., http://localhost:11434/v1)",
     )
 
     parser.add_argument("--list-models", action="store_true", help="List available models and exit")
@@ -88,38 +89,50 @@ Examples:
 
 
 def get_llm_client(provider, args):
-    """Initialize LLM client based on provider (openai/anthropic)."""
-    if provider == "anthropic":
-        try:
-            client = create_claude_client()
-            print(f"✓ Anthropic client initialized")
-            print(f"  Model: {getattr(client, 'model', 'claude-3-sonnet-20240229')}")
-            print(f"  Base URL: {getattr(client, 'base_url', 'ANTHROPIC_BASE_URL')}")
-            return client
-        except Exception as e:
-            print(f"✗ Error initializing Anthropic client: {e}")
-            print("Set ANTHROPIC_BASE_URL and ANTHROPIC_AUTH_TOKEN")
-            sys.exit(1)
-    
-    # Default: OpenAI (original logic)
+    """Initialize LLM client based on provider."""
     api_key = args.api_key or os.environ.get("OPENAI_API_KEY", "")
     base_url = args.api_base or os.environ.get("API_BASE_URL", "")
 
-    if not api_key and not base_url:
-        print("Warning: No OpenAI API key. Set OPENAI_API_KEY or use --api-key.")
-        print("For local (Ollama/LM Studio): --api-base http://localhost:11434/v1")
+    if provider in ["openai", "ollama", "lmstudio"]:
+        # OpenAI-compatible (cloud or local)
+        if not api_key and not base_url and provider == "openai":
+            print(
+                "Warning: No OpenAI API key for 'openai' provider. Set OPENAI_API_KEY or use --api-key."
+            )
 
-    if ("localhost" in base_url or "127.0.0.1" in base_url) and not api_key:
-        api_key = "local-model"
+        if ("localhost" in (base_url or "") or "127.0.0.1" in (base_url or "")) and not api_key:
+            api_key = "local-model"
 
-    try:
-        client = OpenAI(base_url=base_url, api_key=api_key)
-        print(f"✓ OpenAI client initialized")
-        print(f"  Model: {args.model}")
-        print(f"  Base URL: {base_url or 'https://api.openai.com/v1'}")
-        return client
-    except Exception as e:
-        print(f"✗ Error initializing OpenAI client: {e}")
+        try:
+            from openai import OpenAI
+
+            client = OpenAI(base_url=base_url, api_key=api_key)
+            print(f"{provider.upper()} client initialized (OpenAI-compatible)")
+            print(f"  Model: {args.model}")
+            print(f"  Base URL: {base_url or 'https://api.openai.com/v1'}")
+            return client
+        except Exception as e:
+            print(f"Error initializing {provider} client: {e}")
+            sys.exit(1)
+
+    elif provider == "claude":
+        # Claude/Anthropic
+        try:
+            from core.claude_client import create_claude_client
+
+            client = create_claude_client()
+            print(f"Claude client initialized")
+            print(f"  Model: {getattr(client, 'model', 'claude-3-5-sonnet-20240620')}")
+            return client
+        except Exception as e:
+            print(f"Error initializing Claude client: {e}")
+            print(
+                "Set ANTHROPIC_BASE_URL and ANTHROPIC_AUTH_TOKEN env vars, or use --api-base/--api-key"
+            )
+            sys.exit(1)
+
+    else:
+        print(f"Unsupported provider: {provider}")
         sys.exit(1)
 
 
@@ -221,7 +234,7 @@ def main():
     # Get provider and model
     provider = args.provider
     model = args.model
-    
+
     # List models if requested (basic info)
     if args.list_models:
         print(f"Provider: {provider}")
@@ -229,7 +242,7 @@ def main():
         if provider == "anthropic":
             print("Anthropic models: claude-3-5-sonnet-20240620, claude-3-sonnet-20240229")
         sys.exit(0)
-    
+
     # Initialize LLM client
     client = get_llm_client(provider, args)
 

@@ -118,6 +118,7 @@ async function generateDocumentation(inputPath, outputChannel, extensionUri) {
         // Get configuration
         const configManager = new configManager_1.ConfigManager();
         const config = {
+            provider: configManager.provider,
             model: configManager.model,
             language: configManager.language,
             generatePdf: configManager.generatePdf,

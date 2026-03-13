@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 export interface ExtensionConfig {
+    provider: string;
     openaiApiKey: string;
     model: string;
     language: string;
@@ -36,20 +37,58 @@ export class ConfigManager {
         return this.config.get<string>('pythonPath') || '';
     }
 
+get provider(): string {
+        return this.config.get<string>('provider') || 'openai';
+    }
+
     get apiBaseUrl(): string {
         return this.config.get<string>('apiBaseUrl') || '';
     }
 
-    async updateConfig(key: string, value: any): Promise<void> {
+async updateConfig(key: string, value: any): Promise<void> {
         await this.config.update(key, value, vscode.ConfigurationTarget.Global);
+        
+        // Auto-sync defaults if provider changed
+        if (key === 'provider') {
+            await this.syncProviderDefaults();
+        }
     }
 
-    validateConfig(): { valid: boolean; errors: string[] } {
+    public async syncProviderDefaults(): Promise<void> {
+        const provider = this.provider;
+        let model = this.model;
+        let apiBaseUrl = this.apiBaseUrl;
+
+        switch (provider) {
+            case 'openai':
+                model = model || 'gpt-4o-mini';
+                apiBaseUrl = '';
+                break;
+            case 'ollama':
+                model = model || 'llama3.1';
+                apiBaseUrl = apiBaseUrl || 'http://localhost:11434/v1';
+                break;
+            case 'lmstudio':
+                model = model || 'llama3.1';
+                apiBaseUrl = apiBaseUrl || 'http://localhost:1234/v1';
+                break;
+            case 'claude':
+                model = model || 'claude-3-5-sonnet-20240620';
+                apiBaseUrl = '';
+                break;
+        }
+
+        await this.config.update('model', model, vscode.ConfigurationTarget.Global);
+        await this.config.update('apiBaseUrl', apiBaseUrl, vscode.ConfigurationTarget.Global);
+        vscode.window.showInformationMessage(`Provider changed to ${provider}. Model/API updated to defaults.`);
+    }
+
+validateConfig(): { valid: boolean; errors: string[] } {
         const errors: string[] = [];
 
-        // Only require API key if not using local models
-        if (!this.openaiApiKey && !this.apiBaseUrl) {
-            errors.push('OpenAI API key is not configured. Please set it in extension settings or configure a local model API URL.');
+        const needsApiKey = this.provider === 'openai' || this.provider === 'claude';
+        if (needsApiKey && !this.openaiApiKey) {
+            errors.push(`API key required for ${this.provider.toUpperCase()}. Please set it in extension settings.`);
         }
 
         if (!this.model) {
@@ -66,18 +105,22 @@ export class ConfigManager {
         };
     }
 
-    async promptForApiKey(): Promise<string | undefined> {
+async promptForApiKey(): Promise<string | undefined> {
+        const providerName = this.provider.toUpperCase();
+        const promptText = this.provider === 'claude' ? 'Please enter your Anthropic API key (starts with sk-ant-)' : 'Please enter your OpenAI API key (starts with sk-)';
+        const validatePrefix = this.provider === 'claude' ? 'sk-ant-' : 'sk-';
+
         const apiKey = await vscode.window.showInputBox({
-            title: 'OpenAI API Key Required',
-            prompt: 'Please enter your OpenAI API key',
+            title: `${providerName} API Key Required`,
+            prompt: promptText,
             password: true,
             ignoreFocusOut: true,
             validateInput: (value: string) => {
                 if (!value || value.trim().length === 0) {
                     return 'API key cannot be empty';
                 }
-                if (!value.startsWith('sk-')) {
-                    return 'Please enter a valid OpenAI API key (starts with sk-)';
+                if (!value.startsWith(validatePrefix)) {
+                    return `Please enter a valid ${providerName} API key (starts with ${validatePrefix})`;
                 }
                 return null;
             }

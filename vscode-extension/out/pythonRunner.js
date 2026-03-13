@@ -95,6 +95,10 @@ async function runPythonCLI(inputPath, outputDir, outputChannel, config, extensi
             if (config?.language) {
                 cliArgs += ` --language ${config.language}`;
             }
+            // Add provider if specified
+            if (config?.provider) {
+                cliArgs += ` --provider ${config.provider}`;
+            }
             // Add API key if specified
             if (config?.apiKey) {
                 cliArgs += ` --api-key ${config.apiKey}`;

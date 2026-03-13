@@ -28,6 +28,7 @@ const vscode = __importStar(require("vscode"));
 const outputChannel_1 = require("./outputChannel");
 const commands_1 = require("./commands");
 const pythonEnvironment_1 = require("./pythonEnvironment");
+const configManager_1 = require("./configManager");
 let outputChannel;
 function activate(context) {
     console.log('Notebook Documentation Generator extension is now active!');
@@ -46,6 +47,18 @@ function activate(context) {
     });
     // Register commands - pass extension URI for self-contained core module
     (0, commands_1.registerCommands)(context, outputChannel, context.extensionUri);
+    // Listen for config changes to sync provider defaults
+    vscode.workspace.onDidChangeConfiguration(async (e) => {
+        if (e.affectsConfiguration('notebookDocGenerator.provider')) {
+            try {
+                const configManager = new configManager_1.ConfigManager();
+                await configManager.syncProviderDefaults();
+            }
+            catch (error) {
+                console.error('Provider sync failed:', error);
+            }
+        }
+    }, null, context.subscriptions);
     // Show activation message
     vscode.window.showInformationMessage('Notebook Documentation Generator extension activated!');
 }

@@ -120,6 +120,7 @@ async function generateDocumentation(inputPath: string, outputChannel: OutputCha
         // Get configuration
         const configManager = new ConfigManager();
         const config: CLIConfig = {
+            provider: configManager.provider,
             model: configManager.model,
             language: configManager.language,
             generatePdf: configManager.generatePdf,
