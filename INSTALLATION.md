@@ -100,7 +100,7 @@ $env:OPENAI_API_KEY="your-api-key-here"
 
 ```bash
 # For Ollama
-export API_BASE_URL=http://localhost:11434/
+export API_BASE_URL=http://localhost:11434/v1
 
 # For LM Studio
 export API_BASE_URL=http://127.0.0.1:1234/v1
