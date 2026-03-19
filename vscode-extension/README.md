@@ -182,6 +182,8 @@ Each notebook generates:
 ### Building the Extension
 
 ```bash
+npm install -g typescript
+tsc -v
 cd vscode-extension
 npm install
 npm run compile

@@ -85,9 +85,13 @@ class ConfigManager {
     }
     validateConfig() {
         const errors = [];
-        const needsApiKey = this.provider === 'openai' || this.provider === 'claude';
-        if (needsApiKey && !this.openaiApiKey) {
-            errors.push(`API key required for ${this.provider.toUpperCase()}. Please set it in extension settings.`);
+        const warnings = [];
+        if (this.provider === 'openai' && !this.openaiApiKey) {
+            errors.push('API key required for OPENAI. Please set it in extension settings.');
+        }
+        // Claude can rely on ANTHROPIC_AUTH_TOKEN / ANTHROPIC_API_KEY env vars — warn but don't block
+        if (this.provider === 'claude' && !this.openaiApiKey) {
+            warnings.push('No Anthropic API key in settings. Falling back to ANTHROPIC_AUTH_TOKEN / ANTHROPIC_API_KEY environment variable.');
         }
         if (!this.model) {
             errors.push('AI model is not configured.');
@@ -97,7 +101,8 @@ class ConfigManager {
         }
         return {
             valid: errors.length === 0,
-            errors
+            errors,
+            warnings
         };
     }
     async promptForApiKey() {
