@@ -134,6 +134,9 @@ async function generateDocumentation(inputPath: string, outputChannel: OutputCha
             vscode.window.showErrorMessage(validation.errors.join('\n'));
             return;
         }
+        if (validation.warnings.length > 0) {
+            vscode.window.showWarningMessage(validation.warnings.join('\n'));
+        }
 
         // Show progress notification with cancellation support
         vscode.window.withProgress({

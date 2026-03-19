@@ -118,17 +118,20 @@ def get_llm_client(provider, args):
     elif provider == "claude":
         # Claude/Anthropic
         try:
-            from core.claude_client import create_claude_client
+            from core.claude_client import ClaudeClient
 
-            client = create_claude_client()
+            client = ClaudeClient(
+                base_url=base_url or None,
+                auth_token=api_key or None,
+                model=args.model,
+            )
             print(f"Claude client initialized")
-            print(f"  Model: {getattr(client, 'model', 'claude-3-5-sonnet-20240620')}")
+            print(f"  Model: {client.model}")
+            print(f"  Base URL: {client.base_url}")
             return client
         except Exception as e:
             print(f"Error initializing Claude client: {e}")
-            print(
-                "Set ANTHROPIC_BASE_URL and ANTHROPIC_AUTH_TOKEN env vars, or use --api-base/--api-key"
-            )
+            print("Set ANTHROPIC_API_KEY env var or use --api-key")
             sys.exit(1)
 
     else:

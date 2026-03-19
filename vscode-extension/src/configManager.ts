@@ -83,12 +83,17 @@ async updateConfig(key: string, value: any): Promise<void> {
         vscode.window.showInformationMessage(`Provider changed to ${provider}. Model/API updated to defaults.`);
     }
 
-validateConfig(): { valid: boolean; errors: string[] } {
+validateConfig(): { valid: boolean; errors: string[]; warnings: string[] } {
         const errors: string[] = [];
+        const warnings: string[] = [];
 
-        const needsApiKey = this.provider === 'openai' || this.provider === 'claude';
-        if (needsApiKey && !this.openaiApiKey) {
-            errors.push(`API key required for ${this.provider.toUpperCase()}. Please set it in extension settings.`);
+        if (this.provider === 'openai' && !this.openaiApiKey) {
+            errors.push('API key required for OPENAI. Please set it in extension settings.');
+        }
+
+        // Claude can rely on ANTHROPIC_AUTH_TOKEN / ANTHROPIC_API_KEY env vars — warn but don't block
+        if (this.provider === 'claude' && !this.openaiApiKey) {
+            warnings.push('No Anthropic API key in settings. Falling back to ANTHROPIC_AUTH_TOKEN / ANTHROPIC_API_KEY environment variable.');
         }
 
         if (!this.model) {
@@ -101,7 +106,8 @@ validateConfig(): { valid: boolean; errors: string[] } {
 
         return {
             valid: errors.length === 0,
-            errors
+            errors,
+            warnings
         };
     }
 

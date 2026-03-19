@@ -21,24 +21,36 @@ class ClaudeClient:
             auth_token: Optional auth token override (defaults to ANTHROPIC_AUTH_TOKEN env var)
             model: Optional model override (defaults to ANTHROPIC_MODEL env var)
         """
-        self.base_url = base_url or os.getenv("ANTHROPIC_BASE_URL")
-        self.auth_token = auth_token or os.getenv("ANTHROPIC_AUTH_TOKEN")
-        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-3-sonnet-20240229")
+        self.base_url = base_url or os.getenv("ANTHROPIC_BASE_URL", "https://api.anthropic.com/v1")
+        self.auth_token = (
+            auth_token
+            or os.getenv("ANTHROPIC_AUTH_TOKEN")
+            or os.getenv("ANTHROPIC_API_KEY")
+        )
+        self.model = model or os.getenv("ANTHROPIC_MODEL", "claude-3-5-sonnet-20240620")
 
-        if not self.base_url:
-            raise ValueError("ANTHROPIC_BASE_URL environment variable is required")
         if not self.auth_token:
-            raise ValueError("ANTHROPIC_AUTH_TOKEN environment variable is required")
+            raise ValueError(
+                "Anthropic API key is required. Set ANTHROPIC_API_KEY environment variable or use --api-key."
+            )
 
         # Ensure base URL has proper format
         if not self.base_url.endswith("/"):
             self.base_url += "/"
 
+        # Use x-api-key header for official Anthropic API; Bearer for custom proxies
+        is_official_api = "api.anthropic.com" in self.base_url
+        auth_header = (
+            {"x-api-key": self.auth_token}
+            if is_official_api
+            else {"Authorization": f"Bearer {self.auth_token}"}
+        )
+
         # Create a session for connection pooling
         self.session = requests.Session()
         self.session.headers.update(
             {
-                "Authorization": f"Bearer {self.auth_token}",
+                **auth_header,
                 "Content-Type": "application/json",
                 "anthropic-version": "2023-06-01",
             }
